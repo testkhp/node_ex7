@@ -10,16 +10,16 @@
     <!-- 데이터베이스에 있는 데이터값 만큼 목록을 생성-->
     <form id="board" action="/dbseldel" method="get">
         <% if(data.length > 0) { %>
-        <% for(let i=0; i<data.length; i++) { %>
-            <div class="lists">
-                <!-- 체크박스항목을 다중체크해서 데이터를 보낼 때 name속성에 []붙여서 사용 (배열형식) -->
-                <!-- value을 사용한 이유는 해당 게시글 번호값 데이터 전송하려고 사용 -->
-                <input type="checkbox" name="delOk[]" class="delOk" value="<%- data[i].num %>">
-                <div><%- data[i].num %></div>
-                <div><a href="/board/detail/<%- data[i].num %>"><%- data[i].title %></a></div>
-                <div><%- data[i].author %></div>
-            </div>
-        <% } %>
+            <% for(let i=0; i<data.length; i++) { %>
+                <div class="lists">
+                    <!-- 체크박스항목을 다중체크해서 데이터를 보낼 때 name속성에 []붙여서 사용 (배열형식) -->
+                    <!-- value을 사용한 이유는 해당 게시글 번호값 데이터 전송하려고 사용 -->
+                    <input type="checkbox" name="delOk[]" class="delOk" value="<%- data[i].num %>">
+                    <div><%- data[i].num %></div>
+                    <div><a href="/board/detail/<%- data[i].num %>"><%- data[i].title %></a></div>
+                    <div><%- data[i].author %></div>
+                </div>
+            <% } %>
         <% } else { %>
             <div>검색결과가 없습니다.</div>
         <% }%>
@@ -27,6 +27,18 @@
         <input type="checkbox" id="selectToggle"><label for="selectToggle">전체선택/전체해제</label>
     </form>
     <!-- 글쓰기 페이지로 이동-->
+
+    <!-- 검색창-->
+    <form id="searchForm" action="/search" method="get">
+        <!-- 어떤 항목으로 검색할것인지-->
+        <select name="search">
+            <option value="title">제목</option>
+            <option value="author">작성자</option>
+        </select>
+        <!--검색어 입력 데이터-->
+        <input id="inputText" type="text" name="inputText" value="<%- text %>">
+        <button id="searchBtn" type="submit">검색</button>
+    </form>
 
     <a href="/board/insert">글쓰기</a>
 
@@ -79,6 +91,29 @@
                 item.checked = checkToggle
             })
         });
+
+        //검색어 입력하지 않았을 때 경고창 띄움 / 입력했으면 넘어감
+        const searchForm = document.querySelector("#searchForm"); //폼태그
+        const inputText = document.querySelector("#inputText"); //검색어 입력
+        const searchBtn = document.querySelector("#searchBtn");// 전송버튼
+
+        searchBtn.addEventListener("click",(event)=>{
+             let data = inputText.value; //검색어 입력값 data변수에 담음
+
+             // trim() <--- 입력값 앞 뒤 빈 공백문자를 제거시키는 함수
+             let result = data.trim();
+
+             //입력값이 없으면 넘어가지마  
+             if(result === ""){
+                alert("검색어 입력하세요")
+                event.preventDefault();
+             }
+             //입력값이 있으면 넘어가 /search
+             else{
+                searchForm.submit();
+             }
+            
+        })
     </script>
 </body>
 </html>

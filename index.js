@@ -15,12 +15,12 @@ app.use(express.static('public'));
 //데이터 베이스 연결작업
 let db; //데이터베이스 연결을 위한 변수세팅(변수의 이름은 자유롭게 지어도 됨)
 
-MongoClient.connect("db연결코드",function(err,result){
+MongoClient.connect("mongodb+srv://khp2337:cogktkfkd8214@cluster0.kjr1egt.mongodb.net/?retryWrites=true&w=majority",function(err,result){
     //에러가 발생했을경우 메세지 출력(선택사항)
     if(err) { return console.log(err); }
 
     //위에서 만든 db변수에 최종연결 ()안에는 mongodb atlas 사이트에서 생성한 데이터베이스 이름
-    db = result.db("db명");
+    db = result.db("ex5");
 
     //db연결이 제대로 됬다면 서버실행
     app.listen(port,function(){
@@ -35,9 +35,9 @@ app.get("/",function(req,res){
 
 //게시글 목록 페이지
 app.get("/board/list",(req,res)=>{
-   db.collection("board").find().toArray((err,result)=>{
+   db.collection("board").find().sort({num:-1}).toArray((err,result)=>{
         //게시글 목록 데이터 전부 가지고 와서 목록페이지로 전달
-        res.render("brd_list.ejs",{data:result})
+        res.render("brd_list.ejs",{data:result,text:""})
    })
 })
 
@@ -121,5 +121,34 @@ app.post("/dbupdate",(req,res)=>{
         res.redirect(`/board/detail/${req.body.num}`) //데이터베이스 데이터 수정후 게시글 목록페이지로 요청
     })
 })
+
+
+//검색 요청
+app.get("/search",(req,res)=>{
+
+    //검색조건 세팅(찾는 단어는 뭐고, 검색결과 갯수 몇개까지?, 순서정렬?)
+    let check = [
+    {
+        $search:{
+            //db사이트에서 검색엔진 설정한 이름값
+            index:"searchTest",
+            text:{
+                //검색어 입력단어값
+                query:req.query.inputText,
+                //어떤항목을 검색할것인지 -> 여러개 설정할 때는 배열로 [] 설정가능 
+                path:req.query.search
+            }
+        }
+    },
+    {$sort:{num:-1}},
+    // {$limit:2}
+]
+
+    db.collection("board").aggregate(check).toArray((err,result)=>{
+        res.render("brd_list.ejs",{data:result,text:req.query.inputText})
+        //검색결과 데이터들만 보내줌
+    })
+})
+
 
 
